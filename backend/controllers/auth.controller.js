@@ -5,125 +5,158 @@ import jwt from "jsonwebtoken";
 
 class AuthController {
   async registerUser(req, res) {
-    const { name, surname, email, username, password } = req.body;
+    try {
+      const { name, surname, email, username, password } = req.body;
 
-    if (!name || !surname || !email || !username || !password) {
-      return res
-        .status(400)
-        .json({ message: "Debe ingresar todos los datos correspondientes." });
-    }
-
-    const userExists = await User.findOne({
-      $or: [{ email: email }, { username: username }],
-    });
-
-    if (userExists) {
-      return res.status(400).json({ message: "El usuario ya existe." });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const codeGenerated = Math.floor(10000 + Math.random() * 900000).toString();
-
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Registro exitoso",
-      text: `Hola ${name}, tu registro fue exitoso. Tu código de confirmación es: ${codeGenerated}. Este código es válido por 30 minutos.`,
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.log("Error al enviar correo: ", error);
-      } else {
-        console.log("Correo enviado: ", info.response);
+      if (!name || !surname || !email || !username || !password) {
+        return res
+          .status(400)
+          .json({ message: "Debe ingresar todos los datos correspondientes." });
       }
-    });
 
-    const newUser = new User({
-      name,
-      surname,
-      email,
-      username,
-      password: hashedPassword,
-      code_generated: codeGenerated,
-      code_expiration: new Date(Date.now() + 30 * 60 * 1000), // código válido por 30 minutos
-    });
+      const userExists = await User.findOne({
+        $or: [{ email: email }, { username: username }],
+      });
 
-    await newUser.save();
+      if (userExists) {
+        return res.status(400).json({ message: "El usuario ya existe." });
+      }
 
-    res.status(201).json({ message: "Usuario registrado exitosamente." });
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const codeGenerated = Math.floor(10000 + Math.random() * 900000).toString();
+
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Registro exitoso",
+        text: `Hola ${name}, tu registro fue exitoso. Tu código de confirmación es: ${codeGenerated}. Este código es válido por 30 minutos.`,
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.log("Error al enviar correo: ", error);
+        } else {
+          console.log("Correo enviado: ", info.response);
+        }
+      });
+
+      const newUser = new User({
+        name,
+        surname,
+        email,
+        username,
+        password: hashedPassword,
+        code_generated: codeGenerated,
+        code_expiration: new Date(Date.now() + 30 * 60 * 1000), // código válido por 30 minutos
+      });
+
+      await newUser.save();
+
+      res.status(201).json({ message: "Usuario registrado exitosamente." });
+    } catch (error) {
+      res.status(500).json({ message: "Error al registrar usuario", error: error.message });
+    }
   }
 
   async confirmUser(req, res) {
-    const { email, code } = req.body;
+    try {
+      const { email, code } = req.body;
 
-    const user = await User.findOne({ email });
+      if(!email || !code){
+        return res.status(400).json({ message: "Debe ingresar el email y el código de confirmación." });
+      }
 
-    if (!user) {
-      return res.status(404).json({ message: "Usuario no encontrado" });
+      const user = await User.findOne({ email });
+
+      if (!user) {
+        return res.status(404).json({ message: "Usuario no encontrado" });
+      }
+
+      if (user.is_confirmed) {
+        return res.status(400).json({ message: "La cuenta ya está confirmada" });
+      }
+
+      if (user.code_generated !== code) {
+        return res.status(400).json({ message: "Código incorrecto" });
+      }
+
+      if (user.code_expiration < Date.now()) {
+        return res.status(400).json({ message: "El código expiró" });
+      }
+
+      user.is_confirmed = true;
+      user.code_generated = null;
+      user.code_expiration = null;
+
+      await user.save();
+
+      res.json({ message: "Cuenta confirmada exitosamente" });
+    } catch (error) {
+      res.status(500).json({ message: "Error al confirmar usuario", error: error.message });
     }
-
-    if (user.is_confirmed) {
-      return res.status(400).json({ message: "La cuenta ya está confirmada" });
-    }
-
-    if (user.code_generated !== code) {
-      return res.status(400).json({ message: "Código incorrecto" });
-    }
-
-    if (user.code_expiration < Date.now()) {
-      return res.status(400).json({ message: "El código expiró" });
-    }
-
-    user.is_confirmed = true;
-    user.code_generated = null;
-    user.code_expiration = null;
-
-    await user.save();
-
-    res.json({ message: "Cuenta confirmada exitosamente" });
   }
 
   async loginUser(req, res) {
-    const { identifier, password } = req.body;
+    try {
+      const { identifier, password } = req.body;
 
-    const user = await User.findOne({
+      const user = await User.findOne({
       $or: [{ email: identifier }, { username: identifier }],
-    });
+      });
 
-    if(!user){
+      if(!user){
         return res.status(404).json({ message: "Usuario no encontrado" });
-    }
+      }
 
-    if(!user.is_confirmed){
+      if(!user.is_confirmed){
         return res.status(400).json({ message: "La cuenta no está confirmada" });
-    }
+      }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+      const isPasswordValid = await bcrypt.compare(password, user.password);
 
-    if(!isPasswordValid){
+      if(!isPasswordValid){
         return res.status(400).json({ message: "Contraseña incorrecta" });
-    }
+      }
 
-    const token = jwt.sign(
+      const token = jwt.sign(
         {
-            id: user._id,
-            email: user.email
+          id: user._id,
+          email: user.email
         },
         process.env.JWT_SECRET,
         { expiresIn: "7d" }
-    );
+      );
 
-    const userFormatted = {
+      const userFormatted = {
         id: user._id,
         name: user.name,
         surname: user.surname,
         email: user.email,
         username: user.username
-    }
+      }
 
-    res.status(200).json({ token, user: userFormatted });
+      res.status(200).json({ token, user: userFormatted });
+    } catch (error) {
+      res.status(500).json({ message: "Error al iniciar sesión", error: error.message });
+    }
+  }
+
+  async dashboardUser(req, res) {
+    try{
+        const userId = req.user.id;
+
+        const user = await User.findById(userId).select("-password");
+
+        if(!user){
+            return res.status(404).json({ message: "Usuario no encontrado" });
+        }
+
+        res.status(200).json({ user: user});
+    }
+    catch(error){
+        res.status(500).json({ message: "Error al acceder al dashboard", error: error.message });
+    }
   }
 }
 
