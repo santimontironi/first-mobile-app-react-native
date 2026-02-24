@@ -1,7 +1,8 @@
 import express from 'express'
 import dotenv from "dotenv"
 import cors from "cors"
-import router from './routes/auth.routes.js'
+import authRouter from './routes/auth.routes.js'
+import tasksRouter from './routes/tasks.routes.js'
 
 dotenv.config()
 
@@ -13,6 +14,8 @@ app.use(cors({
     origin: process.env.FRONTEND_URL
 }))
 
-app.use("", router)
+app.use("", authRouter)
+app.use("", tasksRouter)
+
 
 export default app

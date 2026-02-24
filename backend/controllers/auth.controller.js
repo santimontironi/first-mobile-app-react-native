@@ -26,11 +26,22 @@ class AuthController {
 
       const codeGenerated = Math.floor(10000 + Math.random() * 900000).toString();
 
+      const tokenGenerated = jwt.sign(
+        {
+          email,
+          code: codeGenerated,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "30m" }
+      );
+
+      const urlRedirect = `${process.env.FRONTEND_URL}/confirm?token=${tokenGenerated}`;
+
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
         subject: "Registro exitoso",
-        text: `Hola ${name}, tu registro fue exitoso. Tu código de confirmación es: ${codeGenerated}. Este código es válido por 30 minutos.`,
+        text: `Hola ${name}, tu registro fue exitoso. Ingresa al siguiente enlace para confirmar tu cuenta: ${urlRedirect}. Este enlace es válido por 30 minutos.`,
       };
 
       transporter.sendMail(mailOptions, (error, info) => {
@@ -61,11 +72,19 @@ class AuthController {
 
   async confirmUser(req, res) {
     try {
-      const { email, code } = req.body;
+      const { token, code } = req.body;
 
-      if(!email || !code){
-        return res.status(400).json({ message: "Debe ingresar el email y el código de confirmación." });
+      if(!token || !code){
+        return res.status(400).json({ message: "Debe ingresar el token y el código de confirmación." });
       }
+
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      if(!decoded || !decoded.email || !decoded.code){
+        return res.status(400).json({ message: "Token inválido" });
+      }
+
+      const { email } = decoded;
 
       const user = await User.findOne({ email });
 
