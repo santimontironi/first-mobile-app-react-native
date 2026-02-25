@@ -57,7 +57,11 @@ const HomeScreen = ({ navigation }) => {
                     </View>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.registerRow}>
+                <TouchableOpacity
+                    style={styles.registerRow}
+                    activeOpacity={0.85}
+                    onPress={() => navigation?.navigate('Register')}
+                >
                     <Text style={styles.registerText}>¿No tienes cuenta? </Text>
                     <Text style={styles.registerLink}>Regístrate gratis</Text>
                 </TouchableOpacity>
