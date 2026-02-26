@@ -1,11 +1,12 @@
-import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Dimensions} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width, height } = Dimensions.get('window'); //dimensions sirve para hacer diseños responsivos basados en el tamaño de la pantalla del dispositivo que esté usando la app
 
 const HomeScreen = ({ navigation }) => {
     return (
-        <View style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor="#080c09" />
+        <SafeAreaView style={styles.container}>
+            <StatusBar barStyle="light-content" backgroundColor="#ffffff" />
 
             <View style={styles.bgCircleLarge} />
             <View style={styles.bgCircleSmall} />
@@ -66,7 +67,9 @@ const HomeScreen = ({ navigation }) => {
                     <Text style={styles.registerLink}>Regístrate gratis</Text>
                 </TouchableOpacity>
             </View>
-        </View>
+
+
+        </SafeAreaView>
     );
 };
 
@@ -75,9 +78,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#080c09',
         paddingHorizontal: 28,
-        paddingTop: 60,
         paddingBottom: 48,
-        overflow: 'hidden',
     },
     bgCircleLarge: {
         position: 'absolute',
