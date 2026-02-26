@@ -112,7 +112,8 @@ class AuthController {
 
       await user.save();
 
-      res.json({ message: "Cuenta confirmada exitosamente" });
+      res.json({ message: "Cuenta confirmada exitosamente, ahora puedes iniciar sesión." });
+
     } catch (error) {
       res.status(500).json({ message: "Error al confirmar usuario", error: error.message });
     }
