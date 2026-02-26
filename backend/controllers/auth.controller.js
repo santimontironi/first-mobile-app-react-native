@@ -35,7 +35,7 @@ class AuthController {
         { expiresIn: "30m" }
       );
 
-      const urlRedirect = `${process.env.FRONTEND_URL}/confirm?token=${tokenGenerated}`;
+      const urlRedirect = `${process.env.FRONTEND_URL}/confirm/${tokenGenerated}`;
 
       const mailOptions = {
         from: process.env.EMAIL_USER,
@@ -72,15 +72,17 @@ class AuthController {
 
   async confirmUser(req, res) {
     try {
-      const { token, code } = req.body;
+      const { token } = req.params;
 
-      if(!token || !code){
+      const { code } = req.body;
+
+      if (!token || !code) {
         return res.status(400).json({ message: "Debe ingresar el token y el código de confirmación." });
       }
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      if(!decoded || !decoded.email || !decoded.code){
+      if (!decoded || !decoded.email || !decoded.code) {
         return res.status(400).json({ message: "Token inválido" });
       }
 
@@ -121,20 +123,20 @@ class AuthController {
       const { identifier, password } = req.body;
 
       const user = await User.findOne({
-      $or: [{ email: identifier }, { username: identifier }],
+        $or: [{ email: identifier }, { username: identifier }],
       });
 
-      if(!user){
+      if (!user) {
         return res.status(404).json({ message: "Usuario no encontrado" });
       }
 
-      if(!user.is_confirmed){
+      if (!user.is_confirmed) {
         return res.status(400).json({ message: "La cuenta no está confirmada" });
       }
 
       const isPasswordValid = await bcrypt.compare(password, user.password);
 
-      if(!isPasswordValid){
+      if (!isPasswordValid) {
         return res.status(400).json({ message: "Contraseña incorrecta" });
       }
 
@@ -162,19 +164,19 @@ class AuthController {
   }
 
   async dashboardUser(req, res) {
-    try{
-        const userId = req.user.id;
+    try {
+      const userId = req.user.id;
 
-        const user = await User.findById(userId).select("-password");
+      const user = await User.findById(userId).select("-password");
 
-        if(!user){
-            return res.status(404).json({ message: "Usuario no encontrado" });
-        }
+      if (!user) {
+        return res.status(404).json({ message: "Usuario no encontrado" });
+      }
 
-        res.status(200).json({ user: user});
+      res.status(200).json({ user: user });
     }
-    catch(error){
-        res.status(500).json({ message: "Error al acceder al dashboard", error: error.message });
+    catch (error) {
+      res.status(500).json({ message: "Error al acceder al dashboard", error: error.message });
     }
   }
 }

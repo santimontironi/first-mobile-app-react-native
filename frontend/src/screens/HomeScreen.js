@@ -6,7 +6,7 @@ const { width, height } = Dimensions.get('window'); //dimensions sirve para hace
 const HomeScreen = ({ navigation }) => {
     return (
         <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor="#ffffff" />
+            <StatusBar barStyle="light-content" backgroundColor="#05080a" />
 
             <View style={styles.bgCircleLarge} />
             <View style={styles.bgCircleSmall} />
@@ -76,9 +76,9 @@ const HomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#080c09',
+        backgroundColor: '#05080a',
         paddingHorizontal: 28,
-        paddingBottom: 48,
+        paddingBottom: 48
     },
     bgCircleLarge: {
         position: 'absolute',
