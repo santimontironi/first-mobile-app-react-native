@@ -14,7 +14,8 @@ const AuthProvider = ({ children }) => {
     async function registerUser(data) {
         setLoading(prev => ({ ...prev, register: true }))
         try {
-            await registerUserService(data)
+            const res = await registerUserService(data)
+            return res
         } catch (error) {
             throw error
         } finally {
@@ -30,6 +31,7 @@ const AuthProvider = ({ children }) => {
             await AsyncStorage.setItem("token", response.token)
 
             setUser(response.user)
+            
         } catch (error) {
             throw error
         } finally {

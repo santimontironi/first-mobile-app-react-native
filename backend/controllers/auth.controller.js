@@ -40,8 +40,61 @@ class AuthController {
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
-        subject: "Registro exitoso",
-        text: `Hola ${name}, tu registro fue exitoso. Ingresa al siguiente enlace para confirmar tu cuenta: ${urlRedirect}. Este enlace es válido por 30 minutos.`,
+        subject: "Confirmá tu cuenta",
+        html: `
+          <div style="font-family: Arial, Helvetica, sans-serif; background-color: #f4f6f8; padding: 40px 20px;">
+            
+            <div style="max-width: 500px; margin: auto; background-color: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+              
+              <h2 style="margin-top: 0; color: #1e293b;">¡Hola ${name}! 👋</h2>
+              
+              <p style="color: #475569; font-size: 15px; line-height: 1.6;">
+                Tu registro fue exitoso. Para activar tu cuenta ingresá el siguiente código:
+              </p>
+
+              <div style="text-align: center; margin: 25px 0;">
+                <span style="
+                  display: inline-block;
+                  background-color: #0f172a;
+                  color: #ffffff;
+                  font-size: 22px;
+                  letter-spacing: 3px;
+                  padding: 12px 24px;
+                  border-radius: 8px;
+                  font-weight: bold;
+                ">
+                  ${codeGenerated}
+                </span>
+              </div>
+
+              <p style="color: #475569; font-size: 14px;">
+                O podés confirmar tu cuenta haciendo clic en el botón:
+              </p>
+
+              <div style="text-align: center; margin: 20px 0;">
+                <a href="${urlRedirect}" 
+                  style="
+                    display: inline-block;
+                    background-color: #2563eb;
+                    color: #ffffff;
+                    text-decoration: none;
+                    padding: 12px 20px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: bold;
+                  ">
+                  Confirmar cuenta
+                </a>
+              </div>
+
+              <p style="color: #94a3b8; font-size: 12px; margin-top: 30px;">
+                Este enlace es válido por 30 minutos. Si no solicitaste este registro, podés ignorar este mensaje.
+              </p>
+
+            </div>
+
+          </div>
+          `,
       };
 
       transporter.sendMail(mailOptions, (error, info) => {

@@ -5,7 +5,7 @@ const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<ConfirmUser />} />
+        <Route path="/confirm/:token" element={<ConfirmUser />} />
       </Routes>
     </BrowserRouter>
   )

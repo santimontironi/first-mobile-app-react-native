@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
         right: 48,
     },
     topSection: {
-        top: '10%',
+        marginTop: 100,
         alignItems: 'flex-start',
         marginBottom: 0,
     },
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     },
     bottomSection: {
         gap: 16,
-        bottom: '8%'
+        marginBottom: 40
     },
     pillsRow: {
         flexDirection: 'row',

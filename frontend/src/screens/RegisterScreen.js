@@ -7,7 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const { width, height } = Dimensions.get("window");
 
 const RegisterScreen = ({ navigation }) => {
-    const { register: registerUser, loading } = useContext(AuthContext);
+    const { registerUser, loading } = useContext(AuthContext);
     const [response, setResponse] = useState(null);
     const [errorBackend, setErrorBackend] = useState(null);
 
@@ -21,7 +21,7 @@ const RegisterScreen = ({ navigation }) => {
             reset();
         } catch (error) {
             setErrorBackend(
-                error.response?.data?.error || "Error al registrar usuario"
+                error.response?.data?.error
             );
             setResponse(null);
         }
