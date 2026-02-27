@@ -10,6 +10,6 @@ export const loginUserService = (data) => {
     return axios.post(`${API_URL}/login`, data);
 }
 
-export const confirmUserService = (data) => {
-    return axios.post(`${API_URL}/confirm`, data);
+export const confirmUserService = (token, code) => {
+    return axios.post(`${API_URL}/confirm/${token}`, { code });
 }

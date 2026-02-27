@@ -27,11 +27,13 @@ const AuthProvider = ({ children }) => {
     async function loginUser(data) {
         setLoading(prev => ({ ...prev, login: true }))
         try {
-            const response = await loginUserService(data)
+            const res = await loginUserService(data)
 
-            await AsyncStorage.setItem("token", response.token)
+            await AsyncStorage.setItem("token", res.data.token)
 
-            setUser(response.user)
+            setUser(res.data.user)
+
+            return res
             
         } catch (error) {
             throw error

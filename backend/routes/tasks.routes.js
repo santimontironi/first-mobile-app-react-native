@@ -4,6 +4,7 @@ import { Router } from "express";
 const router = Router();
 
 router.post("/new-task", tasksController.createTask);
+router.patch("/tasks/:id", tasksController.completeTask);
 router.get("/tasks", tasksController.getTasks);
 router.get("/tasks/completed", tasksController.getCompletedTasks);
 router.get("/tasks/:id", tasksController.taskById);

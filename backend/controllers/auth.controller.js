@@ -28,8 +28,7 @@ class AuthController {
 
       const tokenGenerated = jwt.sign(
         {
-          email,
-          code: codeGenerated,
+          email
         },
         process.env.JWT_SECRET,
         { expiresIn: "30m" }
@@ -103,7 +102,10 @@ class AuthController {
 
   async confirmUser(req, res) {
     try {
-      const { code, token } = req.body;
+
+      const { token } = req.params;
+
+      const { code } = req.body;
 
       if (!token || !code) {
         return res.status(400).json({ message: "Deben de enviarse el token y el código de confirmación." });
@@ -111,7 +113,7 @@ class AuthController {
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      if (!decoded || !decoded.email || !decoded.code) {
+      if (!decoded || !decoded.email) {
         return res.status(400).json({ message: "Token inválido" });
       }
 

@@ -5,7 +5,7 @@ import { verifyAuth } from "../middlewares/verify-auth.js";
 const router = Router();
 
 router.post("/register", authController.registerUser);
-router.post("/confirm", authController.confirmUser);
+router.post("/confirm/:token", authController.confirmUser);
 router.post("/login", authController.loginUser);
 router.get("/dashboard", verifyAuth, authController.dashboardUser);
 

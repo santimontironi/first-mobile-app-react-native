@@ -56,7 +56,7 @@ const ConfirmUser = ({ navigation, route }) => {
                     <Controller
                         control={control}
                         name="code"
-                        rules={{ required: "El código es obligatorio" }}
+                        rules={{ required: "El código es obligatorio", minLength: { value: 6, message: "El código debe tener 6 dígitos" }, maxLength: { value: 6, message: "El código debe tener 6 dígitos" } }}
                         render={({ field: { onChange, value } }) => (
                             <>
                                 <TextInput

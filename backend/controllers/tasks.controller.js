@@ -42,6 +42,24 @@ class TasksController {
         }
     }
 
+    async completeTask(req, res) {
+        try{
+            const taskId = req.params.id;
+            const userId = req.user.id;
+
+            const task = await Task.findByIdAndUpdate({ _id: taskId, fk_user_id: userId }, { is_completed: true }, { new: true });
+
+            if (!task) {
+                return res.status(404).json({ message: "Tarea no encontrada" });
+            }
+
+            res.status(200).json({ message: "Tarea completada exitosamente", task: task });
+        }
+        catch(error){
+            res.status(500).json({ message: "Error al completar la tarea", error: error.message });
+        }
+    }
+
     async deleteTask(req, res) {
         try{
             const taskId = req.params.id;
@@ -53,7 +71,7 @@ class TasksController {
                 return res.status(404).json({ message: "Tarea no encontrada" });
             }
 
-            res.status(200).json({ message: "Tarea eliminada exitosamente" });
+            res.status(200).json({ message: "Tarea eliminada exitosamente", task: task });
         }
         catch(error){
             return res.status(500).json({ message: "Error al eliminar la tarea", error: error.message });
