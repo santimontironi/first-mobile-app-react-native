@@ -117,7 +117,7 @@ class AuthController {
 
       await newUser.save();
 
-      res.status(201).json({ message: "Usuario registrado exitosamente." });
+      res.status(201).json({ message: "Usuario registrado exitosamente. Revisa tu correo para confirmar tu cuenta." });
     } catch (error) {
       res.status(500).json({ message: "Error al registrar usuario", error: error.message });
     }

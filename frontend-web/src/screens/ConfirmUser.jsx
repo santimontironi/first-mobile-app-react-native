@@ -18,9 +18,9 @@ const ConfirmUser = () => {
         }
     }, [token]);
 
-    const onSubmit = (data) => {
+    const onSubmit = async (data) => {
         try {
-            const res = confirmUserService(data.code);
+            const res = await confirmUserService(token, data.code);
             setResponse(res.data.message);
             setErrorBackend(null);
             reset();
@@ -28,6 +28,8 @@ const ConfirmUser = () => {
         catch (error) {
             setErrorBackend(error.response?.data?.message || "Error al confirmar la cuenta");
             setResponse(null);
+            console.error("Error al confirmar usuario: ", error);
+            console.log("error:", error.response?.data?.error || error.message);
         }
     };
 
