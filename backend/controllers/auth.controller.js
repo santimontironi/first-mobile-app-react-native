@@ -35,8 +35,6 @@ class AuthController {
         { expiresIn: "30m" }
       );
 
-      const urlRedirect = `${process.env.FRONTEND_URL}/confirm/${tokenGenerated}`;
-
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
@@ -67,28 +65,8 @@ class AuthController {
                 </span>
               </div>
 
-              <p style="color: #475569; font-size: 14px;">
-                O podés confirmar tu cuenta haciendo clic en el botón:
-              </p>
-
-              <div style="text-align: center; margin: 20px 0;">
-                <a href="${urlRedirect}" 
-                  style="
-                    display: inline-block;
-                    background-color: #2563eb;
-                    color: #ffffff;
-                    text-decoration: none;
-                    padding: 12px 20px;
-                    border-radius: 8px;
-                    font-size: 14px;
-                    font-weight: bold;
-                  ">
-                  Confirmar cuenta
-                </a>
-              </div>
-
               <p style="color: #94a3b8; font-size: 12px; margin-top: 30px;">
-                Este enlace es válido por 30 minutos. Si no solicitaste este registro, podés ignorar este mensaje.
+                Este código es válido por 30 minutos. Si no solicitaste este registro, podés ignorar este mensaje.
               </p>
 
             </div>
@@ -117,7 +95,7 @@ class AuthController {
 
       await newUser.save();
 
-      res.status(201).json({ message: "Usuario registrado exitosamente. Revisa tu correo para confirmar tu cuenta." });
+      res.status(201).json({ message: "Usuario registrado exitosamente. Revisa tu correo para confirmar tu cuenta.", token: tokenGenerated });
     } catch (error) {
       res.status(500).json({ message: "Error al registrar usuario", error: error.message });
     }
@@ -125,12 +103,10 @@ class AuthController {
 
   async confirmUser(req, res) {
     try {
-      const { token } = req.params;
-
-      const { code } = req.body;
+      const { code, token } = req.body;
 
       if (!token || !code) {
-        return res.status(400).json({ message: "Debe ingresar el token y el código de confirmación." });
+        return res.status(400).json({ message: "Deben de enviarse el token y el código de confirmación." });
       }
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);

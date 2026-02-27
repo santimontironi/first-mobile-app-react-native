@@ -9,3 +9,7 @@ export const registerUserService = (data) => {
 export const loginUserService = (data) => {
     return axios.post(`${API_URL}/login`, data);
 }
+
+export const confirmUserService = (data) => {
+    return axios.post(`${API_URL}/confirm`, data);
+}

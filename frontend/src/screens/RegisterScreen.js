@@ -16,7 +16,7 @@ const RegisterScreen = ({ navigation }) => {
     const onSubmit = async (data) => {
         try {
             const res = await registerUser(data);
-            setResponse(res.data.message);
+            navigation.navigate("ConfirmUser", {token: res.token})
             setErrorBackend(null);
             reset();
         } catch (error) {
@@ -166,11 +166,7 @@ const RegisterScreen = ({ navigation }) => {
                                 control={control}
                                 name="password"
                                 rules={{
-                                    required: "La contraseña es requerida",
-                                    minLength: {
-                                        value: 6,
-                                        message: "Mínimo 6 caracteres",
-                                    },
+                                    required: "La contraseña es requerida"
                                 }}
                                 render={({ field: { onChange, onBlur, value } }) => (
                                     <View style={styles.fieldWrapper}>
