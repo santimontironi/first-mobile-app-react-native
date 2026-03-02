@@ -10,60 +10,31 @@ Aplicación fullstack de gestión de tareas con autenticación de usuarios. Incl
 
 ## Arquitectura general
 
-```plantuml
-@startuml
-skinparam backgroundColor #0f172a
-skinparam defaultFontName "Segoe UI"
-skinparam defaultFontSize 13
-skinparam defaultFontColor #e2e8f0
-skinparam ArrowColor #7dd3fc
-skinparam ArrowThickness 1.8
+```mermaid
+graph TD
+    subgraph Clientes
+        A[📱 React Native\nExpo - Mobile]
+    end
 
-skinparam rectangle {
-  BackgroundColor #1e293b
-  BorderColor #334155
-  FontColor #e2e8f0
-  RoundCorner 14
-}
+    subgraph Backend["Backend — Node.js / Express"]
+        C[REST API\n:PORT]
+        D[verifyAuth\nMiddleware JWT]
+        E[Auth Controller]
+        F[Tasks Controller]
+    end
 
-skinparam database {
-  BackgroundColor #1e3a5f
-  BorderColor #3b82f6
-  FontColor #bfdbfe
-}
+    subgraph Datos
+        G[(MongoDB\nMongoose)]
+        H[📧 SMTP\nNodemailer]
+    end
 
-skinparam package {
-  BackgroundColor #0f172a
-  BorderColor #475569
-  FontColor #94a3b8
-  Style rectangle
-}
-
-package "Dispositivo móvil" {
-  rectangle "**React Native**\nExpo Go" as Mobile #1e293b
-}
-
-package "Backend  —  Node.js / Express" {
-  rectangle "**REST API**\n:PORT" as API
-  rectangle "**verifyAuth**\nMiddleware JWT" as MW
-  rectangle "**AuthController**\nregistro · login · confirm" as AuthC
-  rectangle "**TasksController**\nCRUD tareas" as TaskC
-}
-
-package "Servicios externos" {
-  database "**MongoDB**\nMongoose" as DB
-  rectangle "**SMTP**\nNodemailer" as Mail #1e3a2f
-}
-
-Mobile -right-> API : HTTP / Axios
-API -down-> MW : todas las rutas\nprotegidas
-MW -right-> AuthC
-MW -down-> TaskC
-AuthC -right-> DB
-TaskC -right-> DB
-AuthC -down-> Mail : código de\nconfirmación
-
-@enduml
+    A -- HTTP / Axios --> C
+    C --> D
+    D --> E
+    D --> F
+    E --> G
+    F --> G
+    E --> H
 ```
 
 ---
@@ -112,71 +83,6 @@ AuthC -down-> Mail : código de\nconfirmación
     │   └── services/
     │       ├── authService.js
     │       └── tasksService.js
-```
-
----
-
-## Navegación de la app móvil
-
-```plantuml
-@startuml
-skinparam backgroundColor #0f172a
-skinparam defaultFontName "Segoe UI"
-skinparam defaultFontSize 12
-
-skinparam state {
-  BackgroundColor #1e293b
-  BorderColor #3b82f6
-  FontColor #e2e8f0
-  StartColor #3b82f6
-  EndColor #ef4444
-  ArrowColor #7dd3fc
-  ArrowThickness 1.6
-  AttributeFontColor #94a3b8
-}
-
-skinparam note {
-  BackgroundColor #172554
-  BorderColor #3b82f6
-  FontColor #bfdbfe
-}
-
-[*] -[#7dd3fc]-> HomeScreen
-
-state HomeScreen : Pantalla de bienvenida\nIniciar sesión / Registrarse
-
-HomeScreen -[#7dd3fc]--> LoginScreen    : Iniciar sesión
-HomeScreen -[#7dd3fc]--> RegisterScreen : Crear cuenta
-
-state RegisterScreen : Formulario de registro\nname · surname · email\nusername · password
-RegisterScreen -[#7dd3fc]--> ConfirmUser : Registro exitoso\n(token JWT recibido)
-
-state LoginScreen : Email o username\n+ contraseña
-LoginScreen -[#7dd3fc]--> Dashboard : Login exitoso\n(JWT 7 días)
-
-state ConfirmUser : Ingreso del código\nde 6 dígitos recibido\npor email
-ConfirmUser -[#7dd3fc]--> LoginScreen : Cuenta confirmada
-
-state Dashboard : Lista de tareas\nCompletadas / Pendientes\nCerrar sesión
-Dashboard -[#7dd3fc]--> CreateTask  : Nueva tarea
-Dashboard -[#ef4444]--> HomeScreen  : Logout
-
-state CreateTask : Título + Descripción
-CreateTask -[#7dd3fc]--> Dashboard : Tarea creada
-
-note right of ConfirmUser
-  Token válido 30 min.
-  El código expira junto
-  con el token.
-end note
-
-note right of Dashboard
-  Stack Navigator protegido:
-  requiere JWT válido en
-  AsyncStorage.
-end note
-
-@enduml
 ```
 
 ---
@@ -317,238 +223,94 @@ Realiza un **soft delete** (`is_active: false`).
 
 ## Flujo de autenticación
 
-```plantuml
-@startuml
-skinparam backgroundColor #0f172a
-skinparam defaultFontName "Segoe UI"
-skinparam defaultFontSize 12
-skinparam sequenceMessageAlign center
+```mermaid
+sequenceDiagram
+    participant Cliente
+    participant API
+    participant MongoDB
+    participant Email
 
-skinparam participant {
-  BackgroundColor #1e293b
-  BorderColor #3b82f6
-  FontColor #e2e8f0
-  RoundCorner 8
-}
+    Cliente->>API: POST /register {name, email, password...}
+    API->>MongoDB: Guardar usuario (is_confirmed: false)
+    API->>Email: Enviar código de 6 dígitos
+    API-->>Cliente: 201 { token JWT, message }
 
-skinparam sequence {
-  ArrowColor #7dd3fc
-  ArrowThickness 1.6
-  LifeLineBorderColor #475569
-  LifeLineBackgroundColor #1e293b
-  BoxBackgroundColor #0f172a
-  BoxBorderColor #334155
-  DividerBackgroundColor #1e293b
-  DividerBorderColor #475569
-  DividerFontColor #94a3b8
-  NoteBackgroundColor #172554
-  NoteBorderColor #3b82f6
-  NoteFontColor #bfdbfe
-  GroupBackgroundColor #0f172a
-  GroupBorderColor #334155
-  GroupFontColor #94a3b8
-  GroupBodyBackgroundColor #0f172a
-}
+    Cliente->>API: POST /confirm/:token {code}
+    API->>MongoDB: Verificar código y expiración
+    MongoDB-->>API: Usuario encontrado
+    API->>MongoDB: is_confirmed = true
+    API-->>Cliente: 200 { message: "Cuenta confirmada" }
 
-participant "**Móvil**\nReact Native" as CLI
-participant "**API**\nExpress" as API
-participant "**verifyAuth**\nMiddleware" as MW
-participant "**MongoDB**" as DB
-participant "**Email**\nNodemailer" as MAIL
+    Cliente->>API: POST /login {identifier, password}
+    API->>MongoDB: Buscar usuario, verificar contraseña
+    API-->>Cliente: 200 { token JWT (7d), user }
 
-== Registro ==
-
-CLI  -[#7dd3fc]>  API  : POST /register\n{ name, surname, email, username, password }
-API  -[#7dd3fc]>  DB   : findOne({ email | username })
-DB  --[#94a3b8]>  API  : null  (usuario disponible)
-API  -[#7dd3fc]>  DB   : save User\n{ is_confirmed: false, code, code_expiration }
-API  -[#7dd3fc]>  MAIL : sendMail → código 6 dígitos\nválido 30 min
-API --[#7dd3fc]>  CLI  : 201  { token JWT, message }
-
-== Confirmación de cuenta ==
-
-CLI  -[#7dd3fc]>  API  : POST /confirm/:token\n{ code }
-API  -[#7dd3fc]>  API  : jwt.verify(token)
-API  -[#7dd3fc]>  DB   : findOne({ email, code })
-DB  --[#94a3b8]>  API  : usuario encontrado
-note right of API #172554: Verifica código\ny expiración
-API  -[#7dd3fc]>  DB   : is_confirmed = true
-API --[#7dd3fc]>  CLI  : 200  { message: "Cuenta confirmada" }
-
-== Login ==
-
-CLI  -[#7dd3fc]>  API  : POST /login\n{ identifier, password }
-API  -[#7dd3fc]>  DB   : findOne({ email | username })
-DB  --[#94a3b8]>  API  : usuario
-API  -[#7dd3fc]>  API  : bcrypt.compare(password, hash)
-API --[#7dd3fc]>  CLI  : 200  { token JWT (7d), user }
-
-== Acceso protegido ==
-
-CLI  -[#7dd3fc]>  MW   : GET /dashboard\nAuthorization: Bearer <token>
-MW   -[#7dd3fc]>  MW   : jwt.verify(token)\nreq.user = payload
-MW   -[#7dd3fc]>  DB   : findById(userId)
-DB  --[#94a3b8]>  MW   : usuario
-MW  --[#7dd3fc]>  CLI  : 200  { user }
-
-@enduml
+    Cliente->>API: GET /dashboard (Authorization: Bearer token)
+    API->>API: verifyAuth middleware
+    API->>MongoDB: findById(userId)
+    API-->>Cliente: 200 { user }
 ```
 
 ---
 
 ## Flujo de tareas
 
-```plantuml
-@startuml
-skinparam backgroundColor #0f172a
-skinparam defaultFontName "Segoe UI"
-skinparam defaultFontSize 12
-skinparam sequenceMessageAlign center
+```mermaid
+sequenceDiagram
+    participant Cliente
+    participant verifyAuth
+    participant API
+    participant MongoDB
 
-skinparam participant {
-  BackgroundColor #1e293b
-  BorderColor #3b82f6
-  FontColor #e2e8f0
-  RoundCorner 8
-}
+    Cliente->>verifyAuth: Request + Authorization: Bearer token
+    verifyAuth->>verifyAuth: jwt.verify(token)
+    verifyAuth->>API: next() — req.user = decoded
 
-skinparam sequence {
-  ArrowColor #7dd3fc
-  ArrowThickness 1.6
-  LifeLineBorderColor #475569
-  LifeLineBackgroundColor #1e293b
-  BoxBackgroundColor #0f172a
-  BoxBorderColor #334155
-  DividerBackgroundColor #1e293b
-  DividerBorderColor #475569
-  DividerFontColor #94a3b8
-  NoteBackgroundColor #172554
-  NoteBorderColor #3b82f6
-  NoteFontColor #bfdbfe
-  GroupBackgroundColor #0f172a
-  GroupBorderColor #334155
-  GroupFontColor #94a3b8
-  GroupBodyBackgroundColor #0f172a
-}
+    Cliente->>API: POST /new-task {title, description}
+    API->>MongoDB: new Task({ ...data, fk_user_id })
+    API-->>Cliente: 201 { task }
 
-participant "**Móvil**\nReact Native" as CLI
-participant "**verifyAuth**\nMiddleware" as MW
-participant "**TasksController**\nExpress" as API
-participant "**MongoDB**" as DB
+    Cliente->>API: GET /tasks
+    API->>MongoDB: Task.find({ fk_user_id })
+    API-->>Cliente: 200 { tasks[] }
 
-note over MW #172554: Todas las rutas de tareas\nrequieren Bearer token
+    Cliente->>API: PATCH /tasks/:id
+    API->>MongoDB: findByIdAndUpdate → is_completed: true
+    API-->>Cliente: 200 { task }
 
-== Crear tarea ==
-
-CLI  -[#7dd3fc]>  MW   : POST /new-task  { title, description }
-MW   -[#7dd3fc]>  API  : next()  req.user.id
-API  -[#7dd3fc]>  DB   : new Task({ title, description, fk_user_id })
-DB  --[#94a3b8]>  API  : task guardada
-API --[#7dd3fc]>  CLI  : 201  { task }
-
-== Obtener tareas ==
-
-CLI  -[#7dd3fc]>  MW   : GET /tasks
-MW   -[#7dd3fc]>  API  : next()
-API  -[#7dd3fc]>  DB   : Task.find({ fk_user_id, is_active: true })
-DB  --[#94a3b8]>  API  : tasks[]
-API --[#7dd3fc]>  CLI  : 200  { tasks[] }
-
-CLI  -[#7dd3fc]>  MW   : GET /tasks/completed
-MW   -[#7dd3fc]>  API  : next()
-API  -[#7dd3fc]>  DB   : Task.find({ fk_user_id, is_completed: true })
-DB  --[#94a3b8]>  API  : completed tasks[]
-API --[#7dd3fc]>  CLI  : 200  { tasks[] }
-
-== Completar tarea ==
-
-CLI  -[#7dd3fc]>  MW   : PATCH /tasks/:id
-MW   -[#7dd3fc]>  API  : next()
-API  -[#7dd3fc]>  DB   : findByIdAndUpdate → is_completed: true
-DB  --[#94a3b8]>  API  : task actualizada
-API --[#7dd3fc]>  CLI  : 200  { task }
-
-== Eliminar tarea (soft delete) ==
-
-CLI  -[#7dd3fc]>  MW   : DELETE /tasks/:id
-MW   -[#7dd3fc]>  API  : next()
-API  -[#7dd3fc]>  DB   : findByIdAndUpdate → is_active: false
-DB  --[#94a3b8]>  API  : task desactivada
-API --[#7dd3fc]>  CLI  : 200  { task }
-
-@enduml
+    Cliente->>API: DELETE /tasks/:id
+    API->>MongoDB: findByIdAndUpdate → is_active: false
+    API-->>Cliente: 200 { task }
 ```
 
 ---
 
 ## Modelos de datos
 
-```plantuml
-@startuml
-skinparam backgroundColor #0f172a
-skinparam defaultFontName "Segoe UI"
-skinparam defaultFontSize 12
+### User
 
-skinparam class {
-  BackgroundColor #1e293b
-  BorderColor #3b82f6
-  FontColor #e2e8f0
-  HeaderBackgroundColor #1d4ed8
-  HeaderFontColor #ffffff
-  AttributeFontColor #cbd5e1
-  StereotypeFontColor #7dd3fc
-  ArrowColor #7dd3fc
-  ArrowThickness 1.8
-  RoundCorner 10
-}
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `name` | String | Nombre |
+| `surname` | String | Apellido |
+| `email` | String | Email único |
+| `username` | String | Nombre de usuario único |
+| `password` | String | Hash bcrypt |
+| `is_confirmed` | Boolean | Cuenta confirmada (default: `false`) |
+| `code_generated` | String | Código de confirmación temporal |
+| `code_expiration` | Date | Expiración del código (30 min) |
 
-skinparam note {
-  BackgroundColor #172554
-  BorderColor #3b82f6
-  FontColor #bfdbfe
-}
+### Task
 
-class User {
-  + _id       : ObjectId
-  --
-  # name           : String  [required]
-  # surname        : String  [required]
-  # email          : String  [required, unique]
-  # username       : String  [required, unique]
-  # password       : String  [bcrypt hash]
-  --
-  ~ is_confirmed    : Boolean  = false
-  ~ code_generated  : String   = null
-  ~ code_expiration : Date     = null
-}
-
-class Task {
-  + _id         : ObjectId
-  --
-  # fk_user_id  : ObjectId  [ref: User]
-  # title       : String    [required]
-  # description : String    [required]
-  --
-  ~ is_completed : Boolean  = false
-  ~ is_active    : Boolean  = true
-  ~ created_at   : Date     = now()
-  ~ updated_at   : Date     = now()
-}
-
-User "1" -[#7dd3fc]-o{ Task : posee >
-
-note right of User::is_confirmed
-  false → cuenta pendiente
-  true  → puede iniciar sesión
-end note
-
-note right of Task::is_active
-  true  → visible en listados
-  false → eliminada (soft delete)
-end note
-
-@enduml
-```
+| Campo | Tipo | Descripción |
+|---|---|---|
+| `fk_user_id` | ObjectId | Referencia al usuario dueño |
+| `title` | String | Título de la tarea |
+| `description` | String | Descripción |
+| `is_completed` | Boolean | Completada (default: `false`) |
+| `is_active` | Boolean | Activa/soft delete (default: `true`) |
+| `created_at` | Date | Fecha de creación |
+| `updated_at` | Date | Fecha de actualización |
 
 ---
 
@@ -616,19 +378,6 @@ cd frontend
 npm install
 npx expo start
 ```
-
----
-
-## Visualizar los diagramas PlantUML
-
-Los diagramas están escritos en sintaxis [PlantUML](https://plantuml.com/). Para renderizarlos:
-
-| Entorno | Cómo |
-|---|---|
-| **VS Code** | Extensión [PlantUML](https://marketplace.visualstudio.com/items?itemName=jebbs.plantuml) — `Alt + D` para previsualizar |
-| **Online** | Pegar el código en [plantuml.com/plantuml](https://www.plantuml.com/plantuml/uml/) |
-| **GitLab** | Renderizado nativo en Markdown |
-| **IntelliJ / PyCharm** | Plugin PlantUML Integration |
 
 ---
 
