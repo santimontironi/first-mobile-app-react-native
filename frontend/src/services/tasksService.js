@@ -10,3 +10,10 @@ export const getTasksService = (token) => {
     });
 }
 
+export const createTaskService = (token, data) => {
+    return axios.post(`${API_URL}/new-task`, data, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+}

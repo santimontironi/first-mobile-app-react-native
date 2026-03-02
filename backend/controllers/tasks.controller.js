@@ -20,7 +20,7 @@ class TasksController {
         try{
             const userId = req.user.id;
 
-            const tasks = await Task.find({ fk_user_id: userId });
+            const tasks = await Task.find({ fk_user_id: userId, is_active: true, is_completed: false });
 
             res.status(200).json({ tasks: tasks });
         }
@@ -33,7 +33,7 @@ class TasksController {
         try{
             const userId = req.user.id;
 
-            const tasks = await Task.find({ fk_user_id: userId, is_completed: true });
+            const tasks = await Task.find({ fk_user_id: userId, is_active: true, is_completed: true });
 
             res.status(200).json({ tasks: tasks });
         }
@@ -47,7 +47,7 @@ class TasksController {
             const taskId = req.params.id;
             const userId = req.user.id;
 
-            const task = await Task.findByIdAndUpdate({ _id: taskId, fk_user_id: userId }, { is_completed: true }, { new: true });
+            const task = await Task.findByIdAndUpdate({ _id: taskId, fk_user_id: userId, is_active: true }, { is_completed: true }, { new: true });
 
             if (!task) {
                 return res.status(404).json({ message: "Tarea no encontrada" });
@@ -65,7 +65,7 @@ class TasksController {
             const taskId = req.params.id;
             const userId = req.user.id;
 
-            const task = await Task.findByIdAndUpdate({ _id: taskId, fk_user_id: userId }, { is_active: false }, { new: true });
+            const task = await Task.findByIdAndUpdate({ _id: taskId, fk_user_id: userId, is_active: true }, { is_active: false }, { new: true });
 
             if (!task) {
                 return res.status(404).json({ message: "Tarea no encontrada" });
@@ -83,7 +83,7 @@ class TasksController {
             const taskId = req.params.id;
             const userId = req.user.id;
 
-            const task = await Task.findOne({ _id: taskId, fk_user_id: userId });
+            const task = await Task.findOne({ _id: taskId, fk_user_id: userId, is_active: true });
 
             if (!task) {
                 return res.status(404).json({ message: "Tarea no encontrada" });

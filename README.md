@@ -314,6 +314,35 @@ sequenceDiagram
 
 ---
 
+## Testing
+
+El backend cuenta con tests unitarios implementados con **Jest**, usando mocks para aislar las dependencias (MongoDB, bcrypt, JWT, Nodemailer).
+
+### Cobertura actual
+
+| Archivo | Suite | Tests |
+|---|---|---|
+| `auth.test.js` | Registro de usuarios | 4 tests |
+| `auth.test.js` | Confirmación de cuenta | 7 tests |
+| `auth.test.js` | Login de usuarios | 6 tests |
+| `tasks.controller.test.js` | TasksController | 1 test |
+
+### Casos testeados
+
+**Registro** — campos faltantes · usuario duplicado · registro exitoso + envío de email · error interno  
+**Confirmación** — token/código faltante · token inválido · usuario no encontrado · cuenta ya confirmada · código incorrecto · código expirado · confirmación exitosa · error interno  
+**Login** — campos faltantes · usuario no encontrado · cuenta sin confirmar · contraseña incorrecta · login exitoso + generación de JWT · error interno  
+**Tareas** — creación exitosa de tarea
+
+### Ejecutar tests
+
+```bash
+cd backend
+npm test
+```
+
+---
+
 ## Variables de entorno (backend)
 
 Crear un archivo `.env` en `backend/`:
@@ -335,6 +364,12 @@ EMAIL_PASS=tu_contraseña_o_app_password
 cd backend
 npm install
 npm run dev
+```
+
+### Tests (backend)
+```bash
+cd backend
+npm test
 ```
 
 ### Frontend móvil

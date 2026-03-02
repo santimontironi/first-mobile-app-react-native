@@ -5,6 +5,7 @@ import RegisterScreen from '../screens/RegisterScreen';
 import LoginScreen from '../screens/LoginScreen';
 import ConfirmUser from '../screens/ConfirmUser';
 import Dashboard from '../screens/Dashboard';
+import CreateTask from '../screens/CreateTask';
 
 const Stack = createNativeStackNavigator();
 
@@ -16,6 +17,7 @@ const AppNavigation = () => (
       <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
       <Stack.Screen name="ConfirmUser" component={ConfirmUser} options={{ headerShown: false }} />
       <Stack.Screen name="Dashboard" component={Dashboard} options={{ headerShown: false }} />
+      <Stack.Screen name="CreateTask" component={CreateTask} options={{ headerShown: false }} />
     </Stack.Navigator>
   </NavigationContainer>
 );
