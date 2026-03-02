@@ -4,7 +4,7 @@
 
 ## Descripción
 
-Aplicación fullstack de gestión de tareas con autenticación de usuarios. Incluye una API REST en Node.js/Express, una app móvil con React Native (Expo) y una versión web con React + Vite.
+Aplicación fullstack de gestión de tareas con autenticación de usuarios. Incluye una API REST en Node.js/Express y una app móvil con React Native (Expo).
 
 ---
 
@@ -14,7 +14,6 @@ Aplicación fullstack de gestión de tareas con autenticación de usuarios. Incl
 graph TD
     subgraph Clientes
         A[📱 React Native\nExpo - Mobile]
-        B[🌐 React + Vite\nFrontend Web]
     end
 
     subgraph Backend["Backend — Node.js / Express"]
@@ -30,7 +29,6 @@ graph TD
     end
 
     A -- HTTP / Axios --> C
-    B -- HTTP / Axios --> C
     C --> D
     D --> E
     D --> F
@@ -96,7 +94,6 @@ graph TD
 | Backend | Node.js, Express 5, JWT, bcrypt, Nodemailer |
 | Base de datos | MongoDB, Mongoose |
 | Mobile | React Native, Expo, React Navigation |
-| Web | React + Vite |
 | Testing | Jest, Babel |
 
 ---
@@ -327,7 +324,6 @@ MONGO_URI=mongodb://localhost:27017/tu_base_de_datos
 JWT_SECRET=tu_secreto_jwt
 EMAIL_USER=tu_correo@gmail.com
 EMAIL_PASS=tu_contraseña_o_app_password
-FRONTEND_URL=http://localhost:5173
 ```
 
 ---
