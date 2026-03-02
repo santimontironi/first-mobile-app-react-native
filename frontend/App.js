@@ -1,15 +1,18 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View } from 'react-native';
-import { AppNavigation } from './src/navigation';
+import AppNavigation from './src/navigation/AppNavigation';
 import AuthProvider from './src/context/AuthContext';
+import TaskProvider from './src/context/TaskContext';
 
 export default function App() {
   return (
     <AuthProvider>
-      <View style={styles.container}>
-        <AppNavigation />
-        <StatusBar style="auto" />
-      </View>
+      <TaskProvider>
+        <View style={styles.container}>
+          <AppNavigation />
+          <StatusBar style="auto" />
+        </View>
+      </TaskProvider>
     </AuthProvider>
   );
 }

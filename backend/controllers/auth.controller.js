@@ -215,6 +215,7 @@ class AuthController {
       res.status(500).json({ message: "Error al acceder al dashboard", error: error.message });
     }
   }
+  
 }
 
 const authController = new AuthController();

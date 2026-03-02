@@ -8,7 +8,7 @@ const { width, height } = Dimensions.get('window');
 
 const LoginScreen = ({ navigation }) => {
 
-  const { control, handleSubmit, formState: { errors } } = useForm();
+  const { control, handleSubmit, formState: { errors }, reset } = useForm();
 
   const { loginUser, loading } = useContext(AuthContext);
 
@@ -20,7 +20,9 @@ const LoginScreen = ({ navigation }) => {
       navigation.navigate("Dashboard");
       setErrorBackend(null);
     } catch (error) {
-      setErrorBackend(error.response?.data?.error);
+      console.log(error)
+      setErrorBackend(error.response?.data?.message || error.response?.data?.error);
+      reset();
     }
   }
 
@@ -210,10 +212,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#ff000015",
   },
   cardErrorText: {
-    color: "#ffe0e0",
-    fontSize: 11,
-    fontWeight: "600",
-    marginTop: 5,
+    color: "#d42e2e",
+    fontSize: 17,
+    fontWeight: "950",
+    backgroundColor: "#ff00002a",
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 6,
+    marginBottom: 6,
   },
   cardButton: {
     backgroundColor: "#1e8c45",

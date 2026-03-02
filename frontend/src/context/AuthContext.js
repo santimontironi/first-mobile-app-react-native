@@ -78,8 +78,13 @@ const AuthProvider = ({ children }) => {
         fetchUser();
     }, [])
 
+    async function logoutUser() {
+        await AsyncStorage.removeItem("token");
+        setUser(null);
+    }
+
     return (
-        <AuthContext.Provider value={{user, setUser, registerUser, loginUser, loading, confirmUser}}>
+        <AuthContext.Provider value={{user, setUser, registerUser, loginUser, logoutUser, loading, confirmUser}}>
             {children}
         </AuthContext.Provider>
     );
