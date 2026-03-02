@@ -381,6 +381,6 @@ npx expo start
 
 ---
 
-## Contacto / Autor
+## Santiago Montironi
 
 Proyecto personal: primera app en React Native, en desarrollo.
