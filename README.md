@@ -1,5 +1,4 @@
-**Proyecto**
-- **Nombre**: Mi primera aplicación con React Native.
+### Mi primera aplicación con React Native.
 - **Estado**: En desarrollo.
 
 **Descripción**
