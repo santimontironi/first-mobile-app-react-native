@@ -17,3 +17,19 @@ export const createTaskService = (token, data) => {
         }
     });
 }
+
+export const completeTaskService = (token, taskId) => {
+    return axios.patch(`${API_URL}/tasks/${taskId}`, {}, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+}
+
+export const getCompletedTasksService = (token) => {
+    return axios.get(`${API_URL}/tasks/completed`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+}

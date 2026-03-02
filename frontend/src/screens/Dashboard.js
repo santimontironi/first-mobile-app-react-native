@@ -9,10 +9,11 @@ const { width, height } = Dimensions.get("window");
 
 const Dashboard = ({ navigation }) => {
   const { user, loading, logoutUser } = useContext(AuthContext);
-  const { taskList, loading: taskLoading, fetchTasks } = useContext(TaskContext);
+  const { taskList, loading: taskLoading, fetchTasks, fetchCompletedTasks, completeTask, completedTasks } = useContext(TaskContext);
 
   useEffect(() => {
     fetchTasks();
+    fetchCompletedTasks();
   }, []);
 
   const handleLogout = async () => {
@@ -43,12 +44,12 @@ const Dashboard = ({ navigation }) => {
         >
           <View style={styles.header}>
             <View>
-              <Text style={styles.greeting}>Bienvenido 👋</Text>
-              <Text style={styles.username}>{user?.name ?? "Usuario"}</Text>
+              <Text style={styles.greeting}>Bienvenido</Text>
+              <Text style={styles.username}>{user?.username}</Text>
             </View>
             <TouchableOpacity style={styles.avatarButton} onPress={handleLogout}>
               <Text style={styles.avatarText}>
-                {user?.name?.[0]?.toUpperCase() ?? "U"}
+                {user?.name?.[0]?.toUpperCase()}
               </Text>
             </TouchableOpacity>
           </View>
@@ -56,13 +57,15 @@ const Dashboard = ({ navigation }) => {
           <View style={styles.statsRow}>
             <View style={styles.statCard}>
               <Text style={styles.statNumber}>{taskList?.length}</Text>
-              <Text style={styles.statLabel}>Total</Text>
+              <Text style={styles.statLabel}>{taskList?.length === 1 ? "Tarea" : "Tareas"}</Text>
             </View>
             <View style={[styles.statCard, styles.statCardAccent]}>
               <Text style={[styles.statNumber, styles.statNumberAccent]}>
-                {taskList?.filter(t => t.is_completed).length}
+                {completedTasks?.length}
               </Text>
-              <Text style={[styles.statLabel, styles.statLabelAccent]}>Completadas</Text>
+              <Text style={[styles.statLabel, styles.statLabelAccent]}>
+                {completedTasks?.length === 1 ? "Completada" : "Completadas"}
+              </Text>
             </View>
           </View>
 
@@ -85,7 +88,7 @@ const Dashboard = ({ navigation }) => {
             </View>
           ) : (
             taskList.map((task, index) => (
-              <TaskCard key={task.id ?? index} task={task} index={index} />
+              <TaskCard key={index} task={task} onComplete={() => completeTask(task._id)} />
             ))
           )}
         </ScrollView>
@@ -162,9 +165,9 @@ const styles = StyleSheet.create({
     marginBottom: 28,
   },
   greeting: {
-    color: "#4d5a50",
-    fontSize: 13,
-    fontWeight: "500",
+    color: "#3d9e60",
+    fontSize: 24,
+    fontWeight: "800",
     letterSpacing: 0.4,
     marginBottom: 2,
   },

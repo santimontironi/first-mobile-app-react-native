@@ -1,5 +1,5 @@
 import { createContext, useState } from "react";
-import { getTasksService, createTaskService } from "../services/tasksService";
+import { getTasksService, createTaskService, completeTaskService, getCompletedTasksService } from "../services/tasksService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const TaskContext = createContext()
@@ -7,8 +7,10 @@ export const TaskContext = createContext()
 const TaskProvider = ({ children }) => {
 
     const [taskList, setTaskList] = useState([]);
+    const [completedTasks, setCompletedTasks] = useState([]);
     const [loading, setLoading] = useState({
         tasks: false,
+        completedTasks: false,
         create: false
     });
 
@@ -27,12 +29,27 @@ const TaskProvider = ({ children }) => {
         }
     }
 
+    async function fetchCompletedTasks() {
+        setLoading(prev => ({ ...prev, completedTasks: true }))
+        try {
+            const token = await AsyncStorage.getItem("token");
+            const res = await getCompletedTasksService(token);
+            setCompletedTasks(res.data.tasks);
+        }
+        catch (error) {
+            throw error
+        }
+        finally {
+            setLoading(prev => ({ ...prev, completedTasks: false }))
+        }
+    }
+
     async function createTask(data) {
         setLoading(prev => ({ ...prev, create: true }))
         try {
-            const token = await AsyncStorage.getItem("token"); 
+            const token = await AsyncStorage.getItem("token");
             const res = await createTaskService(token, data);
-            setTaskList(prev => [res.data.task, ...prev]); // Agrega la nueva tarea al inicio de la lista, los tres puntitos significa que se mantiene el contenido anterior del array y se agrega el nuevo elemento al inicio
+            setTaskList(prev => [...prev, res.data.task]); // Agrega la nueva tarea al final de la lista, los tres puntitos significa que se mantiene el contenido anterior del array y se agrega el nuevo elemento al final
             return res.data.task;
         }
         catch (error) {
@@ -43,11 +60,26 @@ const TaskProvider = ({ children }) => {
         }
     }
 
-        return (
-            <TaskContext.Provider value={{ taskList, loading, fetchTasks, createTask }}>
-                {children}
-            </TaskContext.Provider>
-        );
+    async function completeTask(id) {
+        try {
+            const token = await AsyncStorage.getItem("token");
+            const res = await completeTaskService(token, id);
+            setTaskList(prev => prev.filter(task => task._id !== id));
+            setCompletedTasks(prev => [...prev, res.data.task]);
+            return res.data.task;
+        }
+        catch (error) {
+            throw error
+        }
     }
 
-    export default TaskProvider;
+    return (
+        <TaskContext.Provider value={{ taskList, completedTasks, loading, fetchTasks, fetchCompletedTasks, createTask, completeTask }}>
+            {children}
+        </TaskContext.Provider>
+    );
+}
+
+
+
+export default TaskProvider;

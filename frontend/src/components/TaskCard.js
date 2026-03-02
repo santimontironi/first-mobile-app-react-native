@@ -1,11 +1,6 @@
-import { View, Text, StyleSheet } from "react-native"
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native"
 
-const TaskCard = ({ task = {} }) => {
-  const {
-    title = "Sin título",
-    description = "",
-    created_at = "",
-  } = task;
+const TaskCard = ({ task, onComplete }) => {
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
@@ -19,21 +14,30 @@ const TaskCard = ({ task = {} }) => {
 
       <View style={styles.content}>
         <Text style={styles.title} numberOfLines={2}>
-          {title}
+          {task.title}
         </Text>
 
-        {!!description && (
+        {!!task.description && (
           <Text style={styles.description} numberOfLines={2}>
-            {description}
+            {task.description}
           </Text>
         )}
 
-        {!!created_at && (
-          <View style={styles.dateRow}>
-            <Text style={styles.dateIcon}>◷</Text>
-            <Text style={styles.dateText}>{formatDate(created_at)}</Text>
-          </View>
-        )}
+
+        <View style={styles.dateRow}>
+          <Text style={styles.dateIcon}>◷</Text>
+          <Text style={styles.dateText}>{formatDate(task.created_at)}</Text>
+        </View>
+
+        <View style={styles.buttonsRow}>
+          <TouchableOpacity style={styles.completeButton} onPress={onComplete}>
+            <Text style={styles.buttonText}>Marcar como completada</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.deleteButton}>
+            <Text style={styles.buttonText}>Eliminar</Text>
+          </TouchableOpacity>
+        </View>
+
       </View>
     </View>
   );
@@ -94,6 +98,29 @@ const styles = StyleSheet.create({
     color: "#2d5c3a",
     fontSize: 11,
     fontWeight: "600",
+    letterSpacing: 0.3,
+  },
+  buttonsRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 8,
+  },
+  completeButton: {
+    backgroundColor: "#3d9e60",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  deleteButton: {
+    backgroundColor: "#e03e3e",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "700",
     letterSpacing: 0.3,
   },
 });

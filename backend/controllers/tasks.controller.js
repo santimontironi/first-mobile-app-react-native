@@ -20,7 +20,7 @@ class TasksController {
         try{
             const userId = req.user.id;
 
-            const tasks = await Task.find({ fk_user_id: userId, is_active: true, is_completed: false });
+            const tasks = await Task.find({ fk_user_id: userId, is_active: true, is_completed: false }).sort({ created_at: -1 });
 
             res.status(200).json({ tasks: tasks });
         }
@@ -33,7 +33,7 @@ class TasksController {
         try{
             const userId = req.user.id;
 
-            const tasks = await Task.find({ fk_user_id: userId, is_active: true, is_completed: true });
+            const tasks = await Task.find({ fk_user_id: userId, is_active: true, is_completed: true }).sort({ created_at: -1 });
 
             res.status(200).json({ tasks: tasks });
         }
