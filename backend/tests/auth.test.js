@@ -159,7 +159,7 @@ describe("Test unitario de la confirmación de usuarios", () => {
 
 })
 
-// ----TEST DE CONFIRMACION DE LOGIN -----
+// ----TEST DE LOGIN -----
 
 describe("Test unitario del login de usuarios", () => {
     let req;
