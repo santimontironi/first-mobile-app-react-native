@@ -17,6 +17,7 @@ const LoginScreen = ({ navigation }) => {
   const handleLogin = async (data) => {
     try {
       await loginUser(data);
+      navigation.navigate("Dashboard");
       setErrorBackend(null);
     } catch (error) {
       setErrorBackend(error.response?.data?.error);
@@ -167,7 +168,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   card: {
-    backgroundColor: "#074b21",
+    backgroundColor: "#032711",
     borderRadius: 28,
     padding: 30,
     width: width * 0.85,
@@ -215,7 +216,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   cardButton: {
-    backgroundColor: "#05080a",
+    backgroundColor: "#1e8c45",
     borderRadius: 14,
     paddingVertical: 15,
     alignItems: "center",
@@ -229,7 +230,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   cardButtonText: {
-    color: "#11df59",
+    color: "#fff",
     fontSize: 16,
     fontWeight: "800",
     letterSpacing: 1.2,

@@ -1,9 +1,20 @@
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
 import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Dimensions} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useEffect } from 'react';
 
 const { width, height } = Dimensions.get('window'); //dimensions sirve para hacer diseños responsivos basados en el tamaño de la pantalla del dispositivo que esté usando la app
 
 const HomeScreen = ({ navigation }) => {
+    const { user } = useContext(AuthContext);
+
+    useEffect(() => {
+        if (user) {
+            navigation.navigate("Dashboard");
+        }
+    }, [user]);
+
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="light-content" backgroundColor="#05080a" />

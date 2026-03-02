@@ -1,5 +1,5 @@
-import { createContext, useState } from "react";
-import { registerUserService, loginUserService, confirmUserService } from "../services/authService";
+import { createContext, use, useEffect, useState } from "react";
+import { registerUserService, loginUserService, confirmUserService, dashboardService } from "../services/authService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const AuthContext = createContext()
@@ -9,7 +9,8 @@ const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState({
         register: false,
         login: false,
-        confirm: false
+        confirm: false,
+        dashboard: true
     });
 
     async function registerUser(data) {
@@ -53,6 +54,29 @@ const AuthProvider = ({ children }) => {
             setLoading(prev => ({ ...prev, confirm: false }))
         }
     }
+
+    useEffect(() => {
+        async function fetchUser() {
+            try{
+                const token = await AsyncStorage.getItem("token");
+                if(token){
+                    const res = await dashboardService(token);
+                    setUser(res.data.user);
+                } else {
+                    setUser(null);
+                }
+            }
+            catch(error){
+                setUser(null);
+                throw error
+            }
+            finally{
+                setLoading(prev => ({ ...prev, dashboard: false }))
+            }
+        }
+        
+        fetchUser();
+    }, [])
 
     return (
         <AuthContext.Provider value={{user, setUser, registerUser, loginUser, loading, confirmUser}}>

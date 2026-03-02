@@ -154,6 +154,10 @@ class AuthController {
     try {
       const { identifier, password } = req.body;
 
+      if (!identifier || !password) {
+        return res.status(400).json({ message: "Debe ingresar todos los datos correspondientes." });
+      }
+
       const user = await User.findOne({
         $or: [{ email: identifier }, { username: identifier }],
       });

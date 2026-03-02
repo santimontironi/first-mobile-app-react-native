@@ -158,3 +158,98 @@ describe("Test unitario de la confirmación de usuarios", () => {
     })
 
 })
+
+// ----TEST DE CONFIRMACION DE LOGIN -----
+
+describe("Test unitario del login de usuarios", () => {
+    let req;
+    let res;
+
+    beforeEach(() => {
+        req = {
+            body: {
+                identifier: "test@example.com",
+                password: "password123"
+            }
+        };
+        res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn()
+        };
+        jest.clearAllMocks();
+    });
+
+    test("Devuelve 400 si faltan campos requeridos", async () => {
+        req.body = { identifier: "onlyemail@example.com" };
+        await authController.loginUser(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ message: "Debe ingresar todos los datos correspondientes." });
+    });
+
+    test("Devuelve 404 si el usuario no existe", async () => {
+        User.findOne.mockResolvedValue(null);
+        await authController.loginUser(req, res);
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.json).toHaveBeenCalledWith({ message: "Usuario no encontrado" });
+    })
+
+    test("Devuelve 400 si el usuario no esta confirmado", async () => {
+        User.findOne.mockResolvedValue({ email: "test@example.com", is_confirmed: false });
+        await authController.loginUser(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ message: "La cuenta no está confirmada" });
+    })
+
+    test("Devuelve 400 si la contraseña es incorrecta", async () => {
+        User.findOne.mockResolvedValue({
+            _id: "someid",
+            email: "test@example.com",
+            is_confirmed: true,
+            password: "hashedpassword"
+        });
+
+        bcrypt.compare.mockResolvedValue(false);
+
+        await authController.loginUser(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ message: "Contraseña incorrecta" });
+    });
+
+    test("Devuelve 200 si el login es exitoso y genera token", async () => {
+        User.findOne.mockResolvedValue({ _id: 'someid', email: "test@example.com", is_confirmed: true, password: "password123" });
+
+        bcrypt.compare.mockResolvedValue(true);
+        
+        jwt.sign.mockReturnValue("validToken");
+
+        await authController.loginUser(req, res);
+
+        expect(jwt.sign).toHaveBeenCalledWith(
+            {
+                id: 'someid',
+                email: "test@example.com"
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: "7d" }
+        );
+
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith({ token: "validToken", user: expect.any(Object) });
+    })
+
+    test("Devuelve 500 si ocurre un error interno durante el login", async () => {
+        User.findOne.mockImplementation(() => { throw new Error('DB failure'); });
+        await authController.loginUser(req, res);
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: "Error al iniciar sesión" }));
+    })
+})
+
+
+
+
+
+
+
+
