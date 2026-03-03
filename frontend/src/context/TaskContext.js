@@ -10,7 +10,7 @@ const TaskProvider = ({ children }) => {
     const [completedTasks, setCompletedTasks] = useState([]);
     const [loading, setLoading] = useState({
         tasks: false,
-        completedTasks: false,
+        completed: false,
         create: false
     });
 
@@ -30,7 +30,7 @@ const TaskProvider = ({ children }) => {
     }
 
     async function fetchCompletedTasks() {
-        setLoading(prev => ({ ...prev, completedTasks: true }))
+        setLoading(prev => ({ ...prev, completed: true }))
         try {
             const token = await AsyncStorage.getItem("token");
             const res = await getCompletedTasksService(token);
@@ -40,7 +40,7 @@ const TaskProvider = ({ children }) => {
             throw error
         }
         finally {
-            setLoading(prev => ({ ...prev, completedTasks: false }))
+            setLoading(prev => ({ ...prev, completed: false }))
         }
     }
 

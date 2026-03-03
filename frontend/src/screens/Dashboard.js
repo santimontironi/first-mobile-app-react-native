@@ -59,14 +59,14 @@ const Dashboard = ({ navigation }) => {
               <Text style={styles.statNumber}>{taskList?.length}</Text>
               <Text style={styles.statLabel}>{taskList?.length === 1 ? "Tarea" : "Tareas"}</Text>
             </View>
-            <View style={[styles.statCard, styles.statCardAccent]}>
+            <TouchableOpacity style={[styles.statCard, styles.statCardAccent]} onPress={() => navigation.navigate("TasksCompleted",{completedTasks, loading: taskLoading.completed})}>
               <Text style={[styles.statNumber, styles.statNumberAccent]}>
                 {completedTasks?.length}
               </Text>
               <Text style={[styles.statLabel, styles.statLabelAccent]}>
                 {completedTasks?.length === 1 ? "Completada" : "Completadas"}
               </Text>
-            </View>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.sectionHeader}>
@@ -88,7 +88,7 @@ const Dashboard = ({ navigation }) => {
             </View>
           ) : (
             taskList.map((task, index) => (
-              <TaskCard key={index} task={task} onComplete={() => completeTask(task._id)} />
+              <TaskCard key={index} task={task} btnComplete={true} onComplete={() => completeTask(task._id)} />
             ))
           )}
         </ScrollView>
