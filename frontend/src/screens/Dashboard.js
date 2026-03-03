@@ -4,21 +4,37 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { AuthContext } from "../context/AuthContext";
 import { TaskContext } from "../context/TaskContext";
 import TaskCard from "../components/TaskCard";
+import { Alert } from "react-native";
 
 const { width, height } = Dimensions.get("window");
 
 const Dashboard = ({ navigation }) => {
   const { user, loading, logoutUser } = useContext(AuthContext);
-  const { taskList, loading: taskLoading, fetchTasks, fetchCompletedTasks, completeTask, completedTasks } = useContext(TaskContext);
+  const { taskList, loading: taskLoading, fetchTasks, completeTask, completedTasks, deleteTask } = useContext(TaskContext);
 
   useEffect(() => {
     fetchTasks();
-    fetchCompletedTasks();
   }, []);
 
   const handleLogout = async () => {
     await logoutUser();
-    navigation.replace("Home");
+    navigation.navigate("Home");
+  }
+
+  const handleDeleteTask = async (taskId) => {
+    try {
+      Alert.alert(
+        "Confirmar eliminación",
+        "¿Estás seguro de que deseas eliminar esta tarea?",
+        [
+          { text: "Cancelar", style: "cancel" },
+          { text: "Eliminar", style: "destructive", onPress: async () => await deleteTask(taskId) }
+        ]
+      );
+    }
+    catch (error) {
+      console.log("Error al eliminar la tarea:", error);
+    }
   }
 
   return (
@@ -47,24 +63,22 @@ const Dashboard = ({ navigation }) => {
               <Text style={styles.greeting}>Bienvenido</Text>
               <Text style={styles.username}>{user?.username}</Text>
             </View>
-            <TouchableOpacity style={styles.avatarButton} onPress={handleLogout}>
-              <Text style={styles.avatarText}>
-                {user?.name?.[0]?.toUpperCase()}
-              </Text>
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+              <Text style={styles.logoutButtonText}>Cerrar sesión</Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.statsRow}>
             <View style={styles.statCard}>
               <Text style={styles.statNumber}>{taskList?.length}</Text>
-              <Text style={styles.statLabel}>{taskList?.length === 1 ? "Tarea" : "Tareas"}</Text>
+              <Text style={styles.statLabel}>{taskList?.length === 1 ? "Tarea pendiente" : "Tareas pendientes"}</Text>
             </View>
-            <TouchableOpacity style={[styles.statCard, styles.statCardAccent]} onPress={() => navigation.navigate("TasksCompleted",{completedTasks, loading: taskLoading.completed})}>
+            <TouchableOpacity style={[styles.statCard, styles.statCardAccent]} onPress={() => navigation.navigate("TasksCompleted")}>
               <Text style={[styles.statNumber, styles.statNumberAccent]}>
                 {completedTasks?.length}
               </Text>
               <Text style={[styles.statLabel, styles.statLabelAccent]}>
-                {completedTasks?.length === 1 ? "Completada" : "Completadas"}
+                {completedTasks?.length === 1 ? "Tarea completada" : "Tareas completadas"}
               </Text>
             </TouchableOpacity>
           </View>
@@ -88,7 +102,7 @@ const Dashboard = ({ navigation }) => {
             </View>
           ) : (
             taskList.map((task, index) => (
-              <TaskCard key={index} task={task} btnComplete={true} onComplete={() => completeTask(task._id)} />
+              <TaskCard key={index} task={task} btnComplete={true} onComplete={() => completeTask(task._id)} onDelete={() => handleDeleteTask(task._id)} />
             ))
           )}
         </ScrollView>
@@ -177,20 +191,21 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     letterSpacing: -0.5,
   },
-  avatarButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  logoutButton: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
     backgroundColor: "#0f1f14",
     borderWidth: 1.5,
     borderColor: "#3d9e60",
     justifyContent: "center",
     alignItems: "center",
   },
-  avatarText: {
+  logoutButtonText: {
     color: "#3d9e60",
-    fontSize: 17,
+    fontSize: 13,
     fontWeight: "700",
+    letterSpacing: 0.3,
   },
   statsRow: {
     flexDirection: "row",

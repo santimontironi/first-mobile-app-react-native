@@ -1,5 +1,5 @@
 import { createContext, useState } from "react";
-import { getTasksService, createTaskService, completeTaskService, getCompletedTasksService } from "../services/tasksService";
+import { getTasksService, createTaskService, completeTaskService, getCompletedTasksService, deleteTaskService } from "../services/tasksService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const TaskContext = createContext()
@@ -49,7 +49,7 @@ const TaskProvider = ({ children }) => {
         try {
             const token = await AsyncStorage.getItem("token");
             const res = await createTaskService(token, data);
-            setTaskList(prev => [...prev, res.data.task]); // Agrega la nueva tarea al final de la lista, los tres puntitos significa que se mantiene el contenido anterior del array y se agrega el nuevo elemento al final
+            setTaskList(prev => [res.data.task, ...prev]); // Agrega la nueva tarea al inicio de la lista, los tres puntitos significa que se mantiene el contenido anterior del array y se agrega el nuevo elemento al inicio
             return res.data.task;
         }
         catch (error) {
@@ -65,7 +65,7 @@ const TaskProvider = ({ children }) => {
             const token = await AsyncStorage.getItem("token");
             const res = await completeTaskService(token, id);
             setTaskList(prev => prev.filter(task => task._id !== id));
-            setCompletedTasks(prev => [...prev, res.data.task]);
+            setCompletedTasks(prev => [res.data.task, ...prev]);
             return res.data.task;
         }
         catch (error) {
@@ -73,8 +73,23 @@ const TaskProvider = ({ children }) => {
         }
     }
 
+    async function deleteTask(id) {
+        try {
+            const token = await AsyncStorage.getItem("token");
+            const taskCompleted = completedTasks.find(task => task._id === id);
+            if (taskCompleted) {
+                setCompletedTasks(prev => prev.filter(task => task._id !== id));
+            }
+            await deleteTaskService(token, id);
+            setTaskList(prev => prev.filter(task => task._id !== id));
+        }
+        catch (error) {
+            throw error
+        }
+    }
+
     return (
-        <TaskContext.Provider value={{ taskList, completedTasks, loading, fetchTasks, fetchCompletedTasks, createTask, completeTask }}>
+        <TaskContext.Provider value={{ taskList, completedTasks, loading, fetchTasks, fetchCompletedTasks, createTask, completeTask, deleteTask }}>
             {children}
         </TaskContext.Provider>
     );

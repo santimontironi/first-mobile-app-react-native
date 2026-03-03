@@ -1,10 +1,27 @@
 import TaskCard from "../components/TaskCard";
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useContext, useEffect } from "react";
+import { TaskContext } from "../context/TaskContext";
 
-const TasksCompleted = ({ navigation, route }) => {
+const TasksCompleted = ({ navigation }) => {
 
-    const { completedTasks, loading } = route.params;
+    const { completedTasks, loading, fetchCompletedTasks, deleteTask } = useContext(TaskContext);
+
+    useEffect(() => {
+        fetchCompletedTasks();
+    }, []);
+
+    const handleDeleteTask = (taskId) => {
+        Alert.alert(
+            "Confirmar eliminación",
+            "¿Estás seguro de que deseas eliminar esta tarea?",
+            [
+                { text: "Cancelar", style: "cancel" },
+                { text: "Eliminar", style: "destructive", onPress: () => deleteTask(taskId) }
+            ]
+        );
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -20,7 +37,7 @@ const TasksCompleted = ({ navigation, route }) => {
                     </TouchableOpacity>
                     <Text style={styles.sectionTitle}>Tareas completadas</Text>
                 </View>
-                {loading ? (
+                {loading.completed ? (
                     <ActivityIndicator style={{ marginTop: 40 }} size="small" color="#3d9e60" />
                 ) : completedTasks?.length === 0 ? (
                     <View style={styles.emptyState}>
@@ -30,7 +47,7 @@ const TasksCompleted = ({ navigation, route }) => {
                     </View>
                 ) : (
                     completedTasks.map((task, index) => (
-                        <TaskCard key={index} task={task} />
+                        <TaskCard key={index} task={task} onDelete={() => handleDeleteTask(task._id)} />
                     ))
                 )}
             </ScrollView>
@@ -99,7 +116,7 @@ const styles = StyleSheet.create({
         fontSize: 48,
     },
     emptyTitle: {
-        color: "#ddeae0",   
+        color: "#ddeae0",
         fontSize: 18,
         fontWeight: "700",
     },

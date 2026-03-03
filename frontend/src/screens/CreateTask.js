@@ -7,12 +7,7 @@ import { TaskContext } from "../context/TaskContext"
 const CreateTask = ({ navigation }) => {
     const { createTask, loading } = useContext(TaskContext)
 
-    const { control, handleSubmit, formState: { errors } } = useForm({
-        defaultValues: {
-            title: "",
-            description: "",
-        }
-    })
+    const { control, handleSubmit, formState: { errors } } = useForm()
 
     const onSubmit = async (data) => {
         try{

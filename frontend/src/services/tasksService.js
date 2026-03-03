@@ -33,3 +33,11 @@ export const getCompletedTasksService = (token) => {
         }
     });
 }
+
+export const deleteTaskService = (token, taskId) => {
+    return axios.delete(`${API_URL}/tasks/${taskId}`, {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+}

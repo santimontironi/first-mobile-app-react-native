@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native"
 
-const TaskCard = ({ task, onComplete, btnComplete }) => {
+const TaskCard = ({ task, onComplete, btnComplete, onDelete }) => {
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
@@ -35,7 +35,7 @@ const TaskCard = ({ task, onComplete, btnComplete }) => {
               <Text style={styles.buttonText}>Marcar como completada</Text>
             </TouchableOpacity>
           )}
-          <TouchableOpacity style={styles.deleteButton}>
+          <TouchableOpacity style={styles.deleteButton} onPress={onDelete}>
             <Text style={styles.buttonText}>Eliminar</Text>
           </TouchableOpacity>
         </View>
