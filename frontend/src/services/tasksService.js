@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = 'http://192.168.100.13:3000';
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 export const getTasksService = (token) => {
     return axios.get(`${API_URL}/tasks`, {

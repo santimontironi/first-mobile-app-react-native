@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://192.168.100.13:3000';
+const API_URL =  process.env.EXPO_PUBLIC_API_URL;
 
 export const registerUserService = (data) => {
     return axios.post(`${API_URL}/register`, data);

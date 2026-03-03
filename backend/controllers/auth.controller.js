@@ -74,13 +74,12 @@ class AuthController {
           `,
       };
 
-      transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-          console.log("Error al enviar correo: ", error);
-        } else {
-          console.log("Correo enviado: ", info.response);
-        }
-      });
+      try {
+        const info = await transporter.sendMail(mailOptions);
+        console.log("Correo enviado: ", info.response);
+      } catch (error) {
+        console.log("Error al enviar correo: ", error.message);
+      }
 
       const newUser = new User({
         name,
@@ -215,7 +214,7 @@ class AuthController {
       res.status(500).json({ message: "Error al acceder al dashboard", error: error.message });
     }
   }
-  
+
 }
 
 const authController = new AuthController();
