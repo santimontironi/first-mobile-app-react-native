@@ -149,6 +149,13 @@ describe("Test unitario de la confirmación de usuarios", () => {
         expect(res.json).toHaveBeenCalledWith({ message: "Cuenta confirmada exitosamente, ahora puedes iniciar sesión." });
     })
 
+    test("Devuelve 500 si el token tiene formato inválido o está expirado", async () => {
+        jwt.verify.mockImplementation(() => { throw new Error("invalid token"); });
+        await authController.confirmUser(req, res);
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: "Error al confirmar usuario" }));
+    })
+
     test("Devuelve 500 si ocurre un error interno durante la confirmación", async () => {
         jwt.verify.mockReturnValue({ email: "user@example.com" });
         User.findOne.mockImplementation(() => { throw new Error('DB failure'); });
@@ -217,25 +224,37 @@ describe("Test unitario del login de usuarios", () => {
     });
 
     test("Devuelve 200 si el login es exitoso y genera token", async () => {
-        User.findOne.mockResolvedValue({ _id: 'someid', email: "test@example.com", is_confirmed: true, password: "password123" });
+        User.findOne.mockResolvedValue({
+            _id: "someid",
+            name: "Test",
+            surname: "User",
+            email: "test@example.com",
+            username: "testuser",
+            is_confirmed: true,
+            password: "hashedpassword"
+        });
 
         bcrypt.compare.mockResolvedValue(true);
-        
         jwt.sign.mockReturnValue("validToken");
 
         await authController.loginUser(req, res);
 
         expect(jwt.sign).toHaveBeenCalledWith(
-            {
-                id: 'someid',
-                email: "test@example.com"
-            },
+            { id: "someid", email: "test@example.com" },
             process.env.JWT_SECRET,
             { expiresIn: "7d" }
         );
-
         expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.json).toHaveBeenCalledWith({ token: "validToken", user: expect.any(Object) });
+        expect(res.json).toHaveBeenCalledWith({
+            token: "validToken",
+            user: {
+                id: "someid",
+                name: "Test",
+                surname: "User",
+                email: "test@example.com",
+                username: "testuser"
+            }
+        });
     })
 
     test("Devuelve 500 si ocurre un error interno durante el login", async () => {
@@ -244,6 +263,53 @@ describe("Test unitario del login de usuarios", () => {
         expect(res.status).toHaveBeenCalledWith(500);
         expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: "Error al iniciar sesión" }));
     })
+})
+
+// ----TEST DE DASHBOARD -----
+
+describe("Test unitario del dashboard de usuarios", () => {
+    let req;
+    let res;
+
+    beforeEach(() => {
+        req = {
+            user: { id: "someuserid" }
+        };
+        res = {
+            status: jest.fn().mockReturnThis(),
+            json: jest.fn()
+        };
+        jest.clearAllMocks();
+    });
+
+    test("Devuelve 404 si el usuario no existe", async () => {
+        User.findById.mockReturnValue({ select: jest.fn().mockResolvedValue(null) });
+        await authController.dashboardUser(req, res);
+        expect(res.status).toHaveBeenCalledWith(404);
+        expect(res.json).toHaveBeenCalledWith({ message: "Usuario no encontrado" });
+    });
+
+    test("Devuelve 200 con los datos del usuario si existe", async () => {
+        const mockUser = {
+            _id: "someuserid",
+            name: "Test",
+            surname: "User",
+            email: "test@example.com",
+            username: "testuser"
+        };
+        User.findById.mockReturnValue({ select: jest.fn().mockResolvedValue(mockUser) });
+        await authController.dashboardUser(req, res);
+        expect(User.findById).toHaveBeenCalledWith("someuserid");
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith({ user: mockUser });
+    });
+
+    test("Devuelve 500 si ocurre un error interno al acceder al dashboard", async () => {
+        User.findById.mockReturnValue({ select: jest.fn().mockRejectedValue(new Error("DB failure")) });
+        await authController.dashboardUser(req, res);
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ message: "Error al acceder al dashboard" }));
+    });
 })
 
 
