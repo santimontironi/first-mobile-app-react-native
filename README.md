@@ -392,8 +392,6 @@ npx expo start
 Proyecto personal: primera app en React Native, en desarrollo.
 
 
-> **Estado**: En desarrollo
-
 ## Descripción
 
 Aplicación fullstack de gestión de tareas con autenticación de usuarios. Incluye una API REST en Node.js/Express y una app móvil con React Native (Expo).
